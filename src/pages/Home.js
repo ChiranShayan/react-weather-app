@@ -1,14 +1,68 @@
+import { useState, useEffect, useCallback } from "react";
+import WeatherCard from "../components/WeatherCard";
+import Loader from "../components/Loader";
+
 export default function Home() {
-  const [city, setCity] = useState("localStorage");
+  const [city, setCity] = useState(
+    localStorage.getItem("lastCity") || "Colombo"
+  );
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const API_KEY = "6609ed7033145debe98ba554ac4661b5";
+
+  const fetchWeather = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
+      );
+      const data = await res.json();
+      console.log(data);
+
+      if (data.cod !== 200) {
+        setError("City not Found! 😶‍🌫️");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Fetched data:", data);
+      setWeather(data);
+      localStorage.setItem("lastCity", city);
+      setLoading(false);
+    } catch (e) {
+      setError("Something went wrong! 🤔");
+      setLoading(false);
+    }
+  }, [city]);
+
+  useEffect(() => {
+    const lastCity = localStorage.getItem("lastCity") || "Colombo";
+    setCity(lastCity);
+    fetchWeather();
+  }, [fetchWeather]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (city.trim() !== "") fetchWeather();
+  };
+  console.log("Weather state:", weather);
 
   return (
-    <div>
-      <h2>Weather App</h2>
-      <input
-        type="text"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-      />
+    <div className="page">
+      <form onSubmit={handleSubmit} className="search-box">
+        <input
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="Enter city Name..."
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      {loading && <Loader />}
+      {error && <p className="error">{error}</p>}
+      {weather && !loading && !error && <WeatherCard weather={weather} />}
     </div>
   );
 }
