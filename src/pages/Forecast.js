@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { ForecastList } from "../components/ForecastList";
-import { Loader } from "../components/Loader";
+import ForecastList from "../components/ForecastList";
+import Loader from "../components/Loader";
 
 export default function Forecast() {
   const [forecast, setForecast] = useState([]);
-  const [Loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const API_KEY = "6609ed7033145debe98ba554ac4661b5";
   const city = localStorage.getItem("lastCity") || "Colombo";
@@ -42,9 +42,9 @@ export default function Forecast() {
   return (
     <div className="page">
       <h2>5-Day Forecast for {city}</h2>
-      {Loading && <Loader />}
+      {loading && <Loader />}
       {error && <p className="error">{error}</p>}
-      {forecast.length > 0 && !Loading && <ForecastList forecast={forecast} />}
+      {forecast.length > 0 && !loading && <ForecastList forecast={forecast} />}
     </div>
   );
 }
